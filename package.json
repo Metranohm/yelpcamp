@@ -1,0 +1,22 @@
+{
+  "name": "yelpcamp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Metranohm/yelpcamp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Metranohm/yelpcamp/issues"
+  },
+  "homepage": "https://github.com/Metranohm/yelpcamp#readme",
+  "dependencies": {
+    "node.js": "^0.0.1-security"
+  }
+}
