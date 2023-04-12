@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Metranohm/yelpcamp#readme",
   "dependencies": {
+    "method-override": "^3.0.0",
     "node.js": "^0.0.1-security"
   }
 }
