@@ -41,6 +41,7 @@ const validateCampground = (req, res, next) => {
 }
 const validateReview = (req, res, next) => {
     const {error} = reviewSchema.validate(req.body);
+    console.log(error);
     if(error) {
         const msg = error.details.map(el => el.message).join(',')
         throw new ExpressError(msg, 400)
@@ -92,10 +93,6 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     res.redirect('/campgrounds');
 }))
 
-app.all('*', (req, res, next) => {
-    next(new ExpressError('Page Not Found', 404));
-})
-
 app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     const review = new Review(req.body.review);
@@ -104,6 +101,10 @@ app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res)
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`)
 }))
+
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Page Not Found', 404));
+})
 
 app.use((err, req, res, next) => {
     const { statusCode = 500 } = err;
