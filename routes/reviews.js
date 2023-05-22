@@ -6,6 +6,7 @@ const ExpressError = require('../utils/ExpressError');
 const catchAsync = require('../utils/catchAsync');
 // const { reviewSchema } = require('../schemas.js');
 const { validateReview, isLoggedIn, isReviewAuthor } = require('../middleware');
+const { moveCursor } = require('readline');
 
 
 
@@ -27,5 +28,7 @@ router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(async (req, r
     req.flash('success', 'Successfully deleted review!')
     res.redirect(`/campgrounds/${id}`);
 }));
+
+
 
 module.exports = router;
