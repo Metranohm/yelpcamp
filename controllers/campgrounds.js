@@ -1,4 +1,11 @@
+const { campgroundSchema } = require('../schemas');
 const Campground = require('../models/campground')
+const { cloudinary } = require('../cloudinary')
+const ExpressError = require('../utils/ExpressError');
+const multer = require('multer');
+const { storage } = require('../cloudinary');
+const upload = multer({ storage });
+
 
 module.exports.index= async (req, res) => {
     const campgrounds = await Campground.find({})
@@ -10,27 +17,12 @@ module.exports.renderNewForm = (req, res) => {
 }
 
 module.exports.createCampground = async (req, res, next) => {
-    upload.single('image')(req, res, function (err) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'File upload failed' });
-      }
-      const campground = new Campground(req.body.campground);
-      campground.author = req.user._id;
-      // Set the image URL based on the uploaded file
-      campground.image = req.file.filename 
-      console.log(req.file);
-      campground.save(function (err) {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: 'Failed to create campground' });
-        }  
-        req.flash('success', 'Successfully made a new campground!');
-        res.redirect(`/campgrounds/${campground._id}`);
-      });
-    });
-  };
-  
+    const campground = new Campground(req.body.campground);
+    campground.author = req.user._id;
+    await campground.save();
+    req.flash('success', 'Successfully made a new campground!');
+    res.redirect(`/campgrounds/${campground._id}`);
+}
 
 module.exports.showCampground = async (req, res) => {
     const campground = await Campground.findById(req.params.id).populate({

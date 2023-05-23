@@ -1,7 +1,6 @@
-if(process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 }
-
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -58,6 +57,7 @@ const sessionConfig = {
 app.use(session(sessionConfig))
 app.use(flash());
 
+
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -91,10 +91,9 @@ app.all('*', (req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-    const { statusCode = 500 } = err;
-    if(!err.message) err.message = 'Oh No, Something Went Wrong!';
-    res.status(statusCode).render('error', { err })
-})
+    console.error(err);
+    res.status(500).send('Something broke!');
+});
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
