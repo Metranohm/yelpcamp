@@ -9,13 +9,28 @@ module.exports.renderNewForm = (req, res) => {
     res.render('campgrounds/new');
 }
 
-module.exports.createCampground = (async (req, res, next) => {      
-    const campground = new Campground(req.body.campground);
-    campground.author = req.user._id;
-    await campground.save();
-    req.flash('success', 'Successfully made a new campground!');
-    res.redirect(`/campgrounds/${campground._id}`)
-})
+module.exports.createCampground = async (req, res, next) => {
+    upload.single('image')(req, res, function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'File upload failed' });
+      }
+      const campground = new Campground(req.body.campground);
+      campground.author = req.user._id;
+      // Set the image URL based on the uploaded file
+      campground.image = req.file.filename 
+      console.log(req.file);
+      campground.save(function (err) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Failed to create campground' });
+        }  
+        req.flash('success', 'Successfully made a new campground!');
+        res.redirect(`/campgrounds/${campground._id}`);
+      });
+    });
+  };
+  
 
 module.exports.showCampground = async (req, res) => {
     const campground = await Campground.findById(req.params.id).populate({

@@ -15,8 +15,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
-
-
+const morgan = require('morgan');
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
@@ -35,6 +34,8 @@ db.once('open', () => {
 });
 
 const app = express();
+
+app.use(morgan('dev'));
 
 app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
