@@ -1,7 +1,17 @@
-<% layout('layouts/boilerplate') %>
 <div class="row">
     <h1 class="text-center">New Campground</h1>
     <div class="col-6 offset-3">
+        <% if (locals.error) { %>
+            <% for(let detail of locals.error.details) { %>
+                <div class="mb-3">
+                    <label class="form-label" for="<%= detail.path[0] %>">Title</label>
+                    <input class="form-control is-invalid" type="text" id="<%= detail.path[0] %>" name="campground[<%= detail.path[0] %>]" required>
+                    <div class="invalid-feedback">
+                        <%= detail.message %>
+                    </div>
+                </div>
+            <% } %>
+        <% } else { %>
         <form action="/campgrounds" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
             <div class="mb-3">
                 <label class="form-label" for="title">Title</label>
@@ -15,17 +25,6 @@
                 <input class="form-control" type="text" id="location" name="campground[location]"required>
             </div>
             <div class="mb-3">
-                <div class="mb-3">
-                    <label for="formFileMultiple" class="form-label">Upload images</label>
-                    <input class="form-control" type="file" id="formFileMultiple" multiple>
-                    <!-- <input type="file" name="image" id="image" multiple> -->
-                </div>
-            </div>
-            <!-- <div class="mb-3">
-                <label class="form-label" for="image">Image URL</label>
-                <input class="form-control" type="text" id="location" name="campground[image]"required>
-            </div> -->
-            <div class="mb-3">
                 <label class="form-label" for="price">Campground Price</label>
                 <div class="input-group">
                     <span class="input-group-text" id="price-label">$</span>
@@ -37,10 +36,16 @@
                 <textarea class="form-control" type="text" id="description" name="campground[description]" required></textarea>
             </div>
             <div class="mb-3">
+                <div class="mb-3">
+                    <label for="formFileMultiple" class="form-label">Upload images</label>
+                    <input class="form-control" type="file" id="formFileMultiple" name="images" multiple>                   
+                </div>
+            </div>
+            <div class="mb-3">
                 <button class="btn btn-success">Add Campground</button>
             </div>           
         </form>
+        <% } %>
         <a href="/campgrounds">All Campgrounds</a> 
     </div>
 </div>
-

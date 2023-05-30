@@ -1,18 +1,13 @@
-const { campgroundSchema } = require('../schemas');
-const Campground = require('../models/campground')
-const { cloudinary } = require('../cloudinary')
-const ExpressError = require('../utils/ExpressError');
-const multer = require('multer');
-const { storage } = require('../cloudinary');
-const upload = multer({ storage });
-const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding")
-const mapBoxToken = process.env.MAPBOX_TOKEN
-const geocoder = mbxGeocoding({ accessToken: mapBoxToken })
+const Campground = require('../models/campground');
+const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+const mapBoxToken = process.env.MAPBOX_ACCESS_TOKEN;
+const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
+const { cloudinary } = require("../cloudinary");
 
 
-module.exports.index= async (req, res) => {
-    const campgrounds = await Campground.find({})
-    res.render('campgrounds/index', { campgrounds });
+module.exports.index = async (req, res) => {
+    const campgrounds = await Campground.find({});
+    res.render('campgrounds/index', { campgrounds })
 }
 
 module.exports.renderNewForm = (req, res) => {
@@ -20,101 +15,56 @@ module.exports.renderNewForm = (req, res) => {
 }
 
 module.exports.createCampground = async (req, res, next) => {
-    try {
-        console.log(req.files);
-        const geoData = await geocoder.forwardGeocode({
-            query: req.body.campground.location,
-            limit: 1,
-        }).send();
+    const geoData = await geocoder.forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1
+    }).send()
+    const campground = new Campground(req.body.campground);
+    campground.geometry = geoData.body.features[0].geometry;
+    campground.images = req.files.map(f => ({ url: f.path, filename: f.filename }));
+    campground.author = req.user._id;
+    await campground.save();
+    console.log(campground);
+    req.flash('success', 'Successfully made a new campground!');
+    res.redirect(`/campgrounds/${campground._id}`)
+}
 
-        const campground = new Campground(req.body.campground);
-        campground.geometry = geoData.body.features[0].geometry.coordinates;
-        campground.images = req.files.map((f) => ({ url: f.path, filename: f.filename }));
-        campground.author = req.user._id;
-        await campground.save();
-        console.log(campground);
-        req.flash('success', 'Successfully made a new campground!');
-        res.redirect(`/campgrounds/${campground._id}`);
-    } catch (error) {
-        next(error);  // pass the error to the error handling middleware
-    }
-};
-
-
-// module.exports.createCampground = async (req, res, next) => {
-//     console.log(req.files);
-//     if (error) {
-//         const message = error.details.map((el) => el.message).join(',');
-//         throw new ExpressError(message, 400);
-//     }
-//     const geoData = await geocoder.forwardGeocode({
-//         query: req.body.campground.location,
-//         limit: 1,
-//     }).send();
-    
-//     const campground = new Campground(req.body.campground);
-//     campground.geometry = geoData.body.features[0].geometry.coordinates;
-//     campground.images = req.files.map((f) => ({ url: f.path, filename: f.filename }));
-//     campground.author = req.user._id;
-//     await campground.save();
-//     console.log(campground);
-//     req.flash('success', 'Successfully made a new campground!');
-//     res.redirect(`/campgrounds/${campground._id}`);
-// };
-
-// module.exports.createCampground = async (req, res, next) => {
-//     const geoData = await geocoder.forwardGeocode({
-//         query: req.body.campground.location,
-//         limit: 1
-//     }).send()
-//     const campground = new Campground(req.body.campground);
-//     campground.geometry = geoData.body.features[0].geometry.coordinates;
-//     campground.images = req.files.map(f => ({url: f.path, filename: f.filename}));
-//     campground.author = req.user._id;
-//     await campground.save();
-//     console.log(campground);
-//     req.flash('success', 'Successfully made a new campground!');
-//     res.redirect(`/campgrounds/${campground._id}`);
-// }
-
-module.exports.showCampground = async (req, res) => {
+module.exports.showCampground = async (req, res,) => {
     const campground = await Campground.findById(req.params.id).populate({
         path: 'reviews',
         populate: {
             path: 'author'
         }
     }).populate('author');
-    console.log(campground)
-    if(!campground){
+    if (!campground) {
         req.flash('error', 'Cannot find that campground!');
         return res.redirect('/campgrounds');
-    };
-    res.render('campgrounds/show', { campground })
+    }
+    res.render('campgrounds/show', { campground });
 }
 
 module.exports.renderEditForm = async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id)
-    if(!campground){
+    if (!campground) {
         req.flash('error', 'Cannot find that campground!');
         return res.redirect('/campgrounds');
     }
-    res.render('campgrounds/edit', { campground })
+    res.render('campgrounds/edit', { campground });
 }
 
 module.exports.updateCampground = async (req, res) => {
-    const { id } = req.params; 
-    console.log(req.body) 
-    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground})
-    const imgs = req.files.map(f => ({url: f.path, filename: f.filename}))
+    const { id } = req.params;
+    console.log(req.body);
+    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
+    const imgs = req.files.map(f => ({ url: f.path, filename: f.filename }));
     campground.images.push(...imgs);
     await campground.save();
-    if (req.body.deleteImages){
-        for(let filename of req.body.deleteImages){
+    if (req.body.deleteImages) {
+        for (let filename of req.body.deleteImages) {
             await cloudinary.uploader.destroy(filename);
         }
-        await campground.updateOne({ $pull: { images: { filename: { $in: req.body.deleteImages}}}})
-        console.log(campground)
+        await campground.updateOne({ $pull: { images: { filename: { $in: req.body.deleteImages } } } })
     }
     req.flash('success', 'Successfully updated campground!');
     res.redirect(`/campgrounds/${campground._id}`)
@@ -123,6 +73,6 @@ module.exports.updateCampground = async (req, res) => {
 module.exports.deleteCampground = async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
-    req.flash('success', 'Successfully deleted campground!')
-    res.redirect(`/campgrounds`);
+    req.flash('success', 'Successfully deleted campground')
+    res.redirect('/campgrounds');
 }

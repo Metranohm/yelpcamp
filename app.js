@@ -5,20 +5,18 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
-const ExpressError = require('./utils/ExpressError');
-const Joi = require('joi');
 const session = require('express-session');
-const catchAsync = require('./utils/catchAsync');
-const methodOverride = require('method-override');
 const flash = require('connect-flash');
+const ExpressError = require('./utils/ExpressError');
+const methodOverride = require('method-override');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const morgan = require('morgan');
+
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
-const validateCampground = require('./middleware');
 
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', { 
