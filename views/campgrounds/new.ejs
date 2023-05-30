@@ -2,6 +2,17 @@
 <div class="row">
     <h1 class="text-center">New Campground</h1>
     <div class="col-6 offset-3">
+        <% if (locals.error) { %>
+            <% for(let detail of locals.error.details) { %>
+                <div class="mb-3">
+                    <label class="form-label" for="<%= detail.path[0] %>">Title</label>
+                    <input class="form-control is-invalid" type="text" id="<%= detail.path[0] %>" name="campground[<%= detail.path[0] %>]" required>
+                    <div class="invalid-feedback">
+                        <%= detail.message %>
+                    </div>
+                </div>
+            <% } %>
+        <% } else { %>
         <form action="/campgrounds" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
             <div class="mb-3">
                 <label class="form-label" for="title">Title</label>
@@ -35,6 +46,7 @@
                 <button class="btn btn-success">Add Campground</button>
             </div>           
         </form>
+        <% } %>
         <a href="/campgrounds">All Campgrounds</a> 
     </div>
 </div>

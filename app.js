@@ -18,6 +18,7 @@ const morgan = require('morgan');
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
+const validateCampground = require('./middleware');
 
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp', { 
@@ -92,8 +93,8 @@ app.use((req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).send('Something broke!');
+    res.status(err.status || 500);
+    res.render('error', { err });
 });
 
 app.listen(3000, () => {
