@@ -1,6 +1,7 @@
 #cluster-map {
     width: 80%;
     height: 300px;
+    margin: 0 auto;
 }
 
 #map {
