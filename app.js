@@ -164,6 +164,8 @@ app.use((err, req, res, next) => {
     res.render('error', { err });
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+var port = process.env.PORT || 3000;
+
+app.listen(port, function() {
+    console.log("Server is running on port " + port);
 });

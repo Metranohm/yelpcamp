@@ -1,8 +1,12 @@
-# fly.toml file generated for yelpcampajw on 2023-06-05T14:58:32-05:00
+# fly.toml app configuration file generated for yelpcampajw on 2023-06-05T15:19:44-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "yelpcampajw"
 kill_signal = "SIGINT"
 kill_timeout = 5
+primary_region = "dfw"
 processes = []
 
 [build]
